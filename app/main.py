@@ -3,6 +3,12 @@
 
 from random import randrange
 from typing import Optional
+import psycopg2
+from psycopg2.extras import RealDictCursor # SQL table column
+from dotenv import load_dotenv
+import os
+load_dotenv()
+
 
 from fastapi import FastAPI, Response, status, HTTPException  # api dev library
 from fastapi.params import \
@@ -30,6 +36,18 @@ class Blog(BaseModel):
     content: str
     published: bool = True
     rating: Optional[int] = None
+
+try:
+    # cursor_factory gives the return as a dictionary, with column name
+    conn = psycopg2.connect(host='localhost', database='fastapi',
+                            user='postgres', password=os.getenv('POSTGRESQL_PASSWORD'),
+                            cursor_factory=RealDictCursor)
+    cursor = conn.cursor()
+    print("DB connection was successful!")
+except Exception as error:
+    print("DB Connection fails")
+    print("Error:", error)
+
 
 
 @app.get("/")
