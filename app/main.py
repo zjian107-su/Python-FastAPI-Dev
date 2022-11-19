@@ -3,6 +3,7 @@
 from random import randrange
 from typing import Optional
 import psycopg2
+from typing import List
 from psycopg2.extras import RealDictCursor  # SQL table column
 from dotenv import load_dotenv
 import os
@@ -20,10 +21,6 @@ load_dotenv()
 models.Base.metadata.create_all(bind=engine)
 
 app = FastAPI()
-
-
-
-
 
 while True:
     try:
@@ -46,23 +43,17 @@ async def root():
     return {"message": "Hello World!!!!!!"}
 
 
-@app.get("/posts")
+@app.get("/posts", response_model=List[schemas.Post])
 async def get_posts(db: Session = Depends(get_db)):
     # cursor.execute("SELECT * FROM posts")
     # posts = cursor.fetchall()
     posts = db.query(models.Post).all()
-    return {"data": posts}
+    return posts
 
 
-@app.post("/createposts", status_code=status.HTTP_201_CREATED)
+@app.post("/createposts", status_code=status.HTTP_201_CREATED, response_model=schemas.Post)
 # def create_posts(user: dict = Body(...)): ## postman Body is the ..., with fastapi.params - Body
 def create_posts(post: schemas.PostCreate, db: Session = Depends(get_db)):
-    # Previous version: memory database
-    # return {"new post": f"My name is {user['name']} and My age is {user['age']}"}
-    ## with fastapi.params - Body
-    # post_dict = post.dict()
-    # post_dict['id'] = randrange(0, 1000000)
-    # my_posts.append(post_dict)
 
     # Previous version02: postgresql database
     # !! Do NOT use f-string to avoid SQL injection attack
@@ -77,7 +68,7 @@ def create_posts(post: schemas.PostCreate, db: Session = Depends(get_db)):
     db.commit()
     db.refresh(new_post)
 
-    return {"data": new_post}
+    return new_post
     # return {"data": "pass"}
 
 
@@ -101,7 +92,7 @@ def get_post(id: int, db: Session = Depends(get_db)):
         # response.status_code = status.HTTP_404_NOT_FOUND
         # return {"message": f"post with id: {id} was not found"}
 
-    return {"post_detail": post}
+    return post
 
 
 @app.delete("/posts/{id}", status_code=status.HTTP_204_NO_CONTENT)
@@ -143,4 +134,4 @@ def update_post(id: int, updated_post: schemas.PostCreate, db: Session = Depends
 
     db.commit()
 
-    return {"data": post_query.first()}
+    return post_query.first()

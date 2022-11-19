@@ -1,4 +1,5 @@
 from pydantic import BaseModel  # restrict input type and format returns
+from datetime import datetime
 
 
 class PostBase(BaseModel):
@@ -14,6 +15,13 @@ class PostBase(BaseModel):
 class PostCreate(PostBase):
     pass
 
-
-
+class Post(BaseModel):
+    id: int
+    title: str
+    content: str
+    published: bool
+    created_at: datetime
+    # change sqlalchemy model to pydantic model
+    class Config:
+        orm_mode = True
 
