@@ -1,6 +1,5 @@
 # Python version: 3.9.6
 # YouTube video:
-
 from random import randrange
 from typing import Optional
 import psycopg2
@@ -8,27 +7,19 @@ from psycopg2.extras import RealDictCursor # SQL table column
 from dotenv import load_dotenv
 import os
 import time
-load_dotenv()
-
-
-from fastapi import FastAPI, Response, status, HTTPException  # api dev library
+from . import models
+from .database import engine, get_db
+from sqlalchemy.orm import Session
+from fastapi import FastAPI, Response, status, HTTPException, Depends
 from fastapi.params import \
     Body  # old fashion way to catch Postman POST params - Body
 from pydantic import BaseModel  # restrict input type and format returns
 
+load_dotenv()
+# checks and craete table
+models.Base.metadata.create_all(bind=engine)
+
 app = FastAPI()
-my_posts = [{"title": "Daniel and Robyn", "content": "Daniel and Robyn visit NYC", "rating": "27", "id": 2}, {"title": "Nabi", "content": "Nabi is the best dog", "id": 3}
-     ]
-
-def find_post(id):
-    for post in my_posts:
-        if post["id"] == id:
-            return post
-
-def find_index_post(id):
-    for index, post in enumerate(my_posts):
-        if post['id'] == id:
-            return index
 
 
 # name str, age int
@@ -36,7 +27,7 @@ class Blog(BaseModel):
     title: str
     content: str
     published: bool = True
-    rating: Optional[int] = None
+    # rating: Optional[int] = None
 
 while True:
     try:
@@ -54,20 +45,27 @@ while True:
 
 
 
+
 @app.get("/")
 async def root():
     return {"message": "Hello World!!!!!!"}
 
+@app.get("/sqlalchemy")
+def test_posts(db: Session = Depends(get_db)):
+    posts = db.query(models.Post).all()
+    return {"status": posts}
+
 
 @app.get("/posts")
-async def get_posts():
-    cursor.execute("SELECT * FROM posts")
-    posts = cursor.fetchall()
+async def get_posts(db: Session = Depends(get_db)):
+    # cursor.execute("SELECT * FROM posts")
+    # posts = cursor.fetchall()
+    posts = db.query(models.Post).all()
     return {"data": posts}
 
 @app.post("/createposts", status_code=status.HTTP_201_CREATED)
 # def create_posts(user: dict = Body(...)): ## postman Body is the ..., with fastapi.params - Body
-def create_posts(post: Blog):
+def create_posts(post: Blog, db: Session = Depends(get_db)):
     # Previous version: memory database
     # return {"new post": f"My name is {user['name']} and My age is {user['age']}"}
     ## with fastapi.params - Body
@@ -76,15 +74,21 @@ def create_posts(post: Blog):
     # my_posts.append(post_dict)
 
 
-    # Current version: postgresql database
+    # Previou version02: postgresql database
     # !! Do NOT use f-string to avoid SQL injection attack
-    cursor.execute(
-        "INSERT INTO posts (title, content, published) VALUES (%s, %s, %s) RETURNING *", (post.title, post.content, post.published))
-
-    new_post = cursor.fetchone()
-
-    conn.commit() 
+    # cursor.execute(
+    #     "INSERT INTO posts (title, content, published) VALUES (%s, %s, %s) RETURNING *", (post.title, post.content, post.published))
+    # new_post = cursor.fetchone()
+    # conn.commit() 
+    
+    # print(**post.dict())
+    new_post = models.Post(**post.dict())
+    db.add(new_post)
+    db.commit()
+    db.refresh(new_post)
+    
     return {"data": new_post}
+    # return {"data": "pass"}
 
 # TODO: from hardcode version --> DB version
 # @app.get("/posts/latest")
