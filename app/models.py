@@ -7,6 +7,9 @@ from .database import Base
 
 
 class Post(Base):
+	"""
+    This post schema comes from Sqlalchemy. This defines how the PostgreSQL table looks like.
+	"""
 	__tablename__ = "posts"
 
 	id = Column(Integer, primary_key=True, nullable=False)
