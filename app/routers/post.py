@@ -23,7 +23,7 @@ async def get_posts(db: Session = Depends(get_db)):
 @router.post("/", status_code=status.HTTP_201_CREATED, response_model=schemas.Post)
 # def create_posts(user: dict = Body(...)): ## postman Body is the ..., with fastapi.params - Body
 def create_posts(post: schemas.PostCreate, db: Session = Depends(get_db),
-                 user_id: int = Depends(oauth2.get_current_user)):
+                 current_user: int = Depends(oauth2.get_current_user)):
     # Previous version02: postgresql database
     # !! Do NOT use f-string to avoid SQL injection attack
     # cursor.execute(
@@ -32,7 +32,7 @@ def create_posts(post: schemas.PostCreate, db: Session = Depends(get_db),
     # new_post = cursor.fetchone()
     # conn.commit()
 
-    print(f'User {user_id} has made the post request')  # check if the login is successful by return
+    print(f'User {current_user} has made the post request')  # check if the login is successful by return
     # requested
     # user id
 
@@ -70,7 +70,7 @@ def get_post(id: int, db: Session = Depends(get_db)):
 
 
 @router.delete("/{id}", status_code=status.HTTP_204_NO_CONTENT)
-def delete_post(id: int, db: Session = Depends(get_db), user_id: int = Depends(oauth2.get_current_user)):
+def delete_post(id: int, db: Session = Depends(get_db), current_user: int = Depends(oauth2.get_current_user)):
     # delete post
     # find the index in the array that has required ID
     # my_posts.pop(index)
@@ -79,7 +79,7 @@ def delete_post(id: int, db: Session = Depends(get_db), user_id: int = Depends(o
     # deleted_post = cursor.fetchone()
     # conn.commit()
 
-    print(f'User with {user_id} has made the delete request')  # check if the login is successful by return
+    print(f'User with {current_user} has made the delete request')  # check if the login is successful by return
     post_query = db.query(models.Post).filter(models.Post.id == id)
 
     if post_query.first() is None:
@@ -93,14 +93,14 @@ def delete_post(id: int, db: Session = Depends(get_db), user_id: int = Depends(o
 
 @router.put("/{id}")
 def update_post(id: int, updated_post: schemas.PostCreate, db: Session = Depends(get_db),
-                user_id: int = Depends(oauth2.get_current_user)):
+                current_user: int = Depends(oauth2.get_current_user)):
     # cursor.execute(
     #     "UPDATE posts SET title = %s, content = %s, published = %s WHERE id = %s RETURNING *",
     #     (post.title, post.content, post.published, str(id)))
     # updated_post = cursor.fetchone()
     # conn.commit()
 
-    print(f'User with {user_id} has made the update request')  # check if the login is successful by return
+    print(f'User with {current_user} has made the update request')  # check if the login is successful by return
 
     post_query = db.query(models.Post).filter(models.Post.id == id)
     post = post_query.first()
