@@ -1,5 +1,5 @@
 from .. import models, schemas
-from typing import List
+from typing import List, Optional
 from fastapi import APIRouter
 from sqlalchemy.orm import Session
 from ..database import get_db
@@ -12,19 +12,25 @@ router = APIRouter(
 )
 
 
+# GET ALL permitted posts
 @router.get("/", response_model=List[schemas.Post])
 async def get_posts(db: Session = Depends(get_db),
                     current_user: int = Depends(oauth2.get_current_user),
-                    limit: int = 100):
+                    limit: int = 100,
+                    skip: int = 0,
+                    search: Optional[str] = ""
+                    ):
     # cursor.execute("SELECT * FROM posts")
     # posts = cursor.fetchall()
-    posts_query_sql = db.query(models.Post).filter(models.Post.owner_id == current_user.id).limit(limit)
+    # posts_query_sql = db.query(models.Post).filter(models.Post.owner_id == current_user.id).limit(limit)
+    posts_query_sql = db.query(models.Post).filter(models.Post.title.contains(search)).limit(limit).offset(skip)
     posts = posts_query_sql.all()
 
     print(posts_query_sql)
     return posts
 
 
+# POST one post
 @router.post("/", status_code=status.HTTP_201_CREATED, response_model=schemas.Post)
 # def create_posts(user: dict = Body(...)): ## postman Body is the ..., with fastapi.params - Body
 def create_posts(post: schemas.PostCreate, db: Session = Depends(get_db),
@@ -38,11 +44,9 @@ def create_posts(post: schemas.PostCreate, db: Session = Depends(get_db),
     # conn.commit()
 
     print(f'User {current_user} has made the post request')  # check if the login is successful by return
-    # requested
-    # user id
 
     # print(**post.dict())
-    new_post = models.Post(owner_id = current_user.id, **post.dict())
+    new_post = models.Post(owner_id=current_user.id, **post.dict())
     db.add(new_post)
     db.commit()
     db.refresh(new_post)
@@ -51,12 +55,7 @@ def create_posts(post: schemas.PostCreate, db: Session = Depends(get_db),
     # return {"data": "pass"}
 
 
-# TODO: from hardcode version --> DB version
-# @app.get("/posts/latest")
-# def get_latest_post():
-#     post = my_posts[len(my_posts) - 1]
-#     return {"detail": post}
-
+# GET one post
 @router.get("/{id}")
 def get_post(id: int,
              db: Session = Depends(get_db),
@@ -69,9 +68,6 @@ def get_post(id: int,
 
     if not post:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=f'post with id: {id} was not found')
-        # hardcode to deal with exception
-        # response.status_code = status.HTTP_404_NOT_FOUND
-        # return {"message": f"post with id: {id} was not found"}
 
     if post.owner_id != current_user.id:
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Not authorized to perform load")
@@ -79,12 +75,9 @@ def get_post(id: int,
     return post
 
 
+# DELETE post
 @router.delete("/{id}", status_code=status.HTTP_204_NO_CONTENT)
 def delete_post(id: int, db: Session = Depends(get_db), current_user: int = Depends(oauth2.get_current_user)):
-    # delete post
-    # find the index in the array that has required ID
-    # my_posts.pop(index)
-
     # cursor.execute("DELETE FROM posts WHERE id = %s RETURNING *", (str(id)))
     # deleted_post = cursor.fetchone()
     # conn.commit()
@@ -107,6 +100,7 @@ def delete_post(id: int, db: Session = Depends(get_db), current_user: int = Depe
     return Response(status_code=status.HTTP_204_NO_CONTENT)
 
 
+# UPDATE post
 @router.put("/{id}")
 def update_post(id: int, updated_post: schemas.PostCreate, db: Session = Depends(get_db),
                 current_user: int = Depends(oauth2.get_current_user)):
