@@ -4,11 +4,36 @@ from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker
 from dotenv import load_dotenv
 import os
+from .config import settings
+# import time
+# from fastapi.params import \
+#     Body  # old fashion way to catch Postman POST params - Body
+# from psycopg2.extras import RealDictCursor  # SQL table column
+# import psycopg2
 
 load_dotenv()
 
-SQLALCHEMY_DATABASE_URL = "postgresql://daniel:%s@localhost/fastapi" % os.getenv('POSTGRESQL_PASSWORD')
-# print(SQLALCHEMY_DATABASE_URL)
+# LEGACY: old way to connect to DB with raw SQL execution. Now placed wit SQLACHEMY
+# while True:
+#     try:
+#         # postgresql python code
+#         # cursor_factory gives the return as a dictionary, with column name
+#         conn = psycopg2.connect(host='localhost', database='fastapi',
+#                                 user='postgres', password=os.getenv('POSTGRESQL_PASSWORD'),
+#                                 cursor_factory=RealDictCursor)
+#         cursor = conn.cursor()
+#         print("DB connection was successful!")
+#         break
+#     except Exception as error:
+#         print("DB Connection fails")
+#         print("Error:", error)
+#         time.sleep(2)
+
+# SQLALCHEMY DB CONNECTION
+SQLALCHEMY_DATABASE_URL = f"postgresql://{settings.database_username}:{settings.database_password}@" \
+                          f"{settings.database_hostname}" \
+                          f"/{settings.database_name}"
+print(SQLALCHEMY_DATABASE_URL)
 
 engine = create_engine(SQLALCHEMY_DATABASE_URL)
 

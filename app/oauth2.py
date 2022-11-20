@@ -6,14 +6,15 @@ from dotenv import load_dotenv
 from fastapi.security import OAuth2PasswordBearer
 import os
 from . import schemas, database, models
+from .config import settings
 
 load_dotenv()
 
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="login")
 
-SECRET_KEY = os.getenv('SECRET_KEY')
-ALGORITHM = "HS256"
-ACCESS_TOKEN_EXPIRE_MINUTES = 60
+SECRET_KEY = settings.secret_key
+ALGORITHM = settings.algorithm
+ACCESS_TOKEN_EXPIRE_MINUTES = settings.access_token_expire_minutes
 
 
 def create_access_token(data: dict, expires_delta: Union[timedelta, None] = None):
