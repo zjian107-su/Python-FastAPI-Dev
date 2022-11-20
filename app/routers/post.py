@@ -13,10 +13,15 @@ router = APIRouter(
 
 
 @router.get("/", response_model=List[schemas.Post])
-async def get_posts(db: Session = Depends(get_db)):
+async def get_posts(db: Session = Depends(get_db),
+                    current_user: int = Depends(oauth2.get_current_user),
+                    limit: int = 100):
     # cursor.execute("SELECT * FROM posts")
     # posts = cursor.fetchall()
-    posts = db.query(models.Post).all()
+    posts_query_sql = db.query(models.Post).filter(models.Post.owner_id == current_user.id).limit(limit)
+    posts = posts_query_sql.all()
+
+    print(posts_query_sql)
     return posts
 
 
@@ -37,7 +42,7 @@ def create_posts(post: schemas.PostCreate, db: Session = Depends(get_db),
     # user id
 
     # print(**post.dict())
-    new_post = models.Post(**post.dict())
+    new_post = models.Post(owner_id = current_user.id, **post.dict())
     db.add(new_post)
     db.commit()
     db.refresh(new_post)
@@ -53,7 +58,9 @@ def create_posts(post: schemas.PostCreate, db: Session = Depends(get_db),
 #     return {"detail": post}
 
 @router.get("/{id}")
-def get_post(id: int, db: Session = Depends(get_db)):
+def get_post(id: int,
+             db: Session = Depends(get_db),
+             current_user: int = Depends(oauth2.get_current_user)):
     # cursor.execute("SELECT * FROM posts WHERE id = %s", (str(id)))
     # post = cursor.fetchone()
 
@@ -65,6 +72,9 @@ def get_post(id: int, db: Session = Depends(get_db)):
         # hardcode to deal with exception
         # response.status_code = status.HTTP_404_NOT_FOUND
         # return {"message": f"post with id: {id} was not found"}
+
+    if post.owner_id != current_user.id:
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Not authorized to perform load")
 
     return post
 
@@ -82,9 +92,15 @@ def delete_post(id: int, db: Session = Depends(get_db), current_user: int = Depe
     print(f'User with {current_user} has made the delete request')  # check if the login is successful by return
     post_query = db.query(models.Post).filter(models.Post.id == id)
 
-    if post_query.first() is None:
+    post = post_query.first()
+
+    if post is None:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,
                             detail=f'post with id: {id} was not found')
+
+    if post.owner_id != current_user.id:
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Not authorized to perform delete")
+
     post_query.delete(synchronize_session=False)
     db.commit()
 
@@ -108,6 +124,9 @@ def update_post(id: int, updated_post: schemas.PostCreate, db: Session = Depends
     if post is None:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,
                             detail=f'post with id: {id} was not found')
+
+    if post.owner_id != current_user.id:
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Not authorized to perform update")
 
     post_query.update(updated_post.dict(), synchronize_session=False)
 
