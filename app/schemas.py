@@ -1,4 +1,4 @@
-from pydantic import BaseModel, EmailStr  # restrict input type and format returns
+from pydantic import BaseModel, EmailStr, conint  # restrict input type and format returns
 from datetime import datetime
 from typing import Optional
 
@@ -37,6 +37,15 @@ class Post(PostBase):
         orm_mode = True
 
 
+class PostOut(PostBase):
+    Post: Post
+    votes: int
+
+    # change sqlalchemy model to pydantic model
+    class Config:
+        orm_mode = True
+
+
 class UserCreate(BaseModel):
     email: EmailStr
     password: str
@@ -54,3 +63,8 @@ class Token(BaseModel):
 
 class TokenData(BaseModel):
     id: Optional[str] = None
+
+
+class Vote(BaseModel):
+    post_id: int
+    dir: conint(le=1)

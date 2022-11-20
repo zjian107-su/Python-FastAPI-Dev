@@ -2,6 +2,7 @@ from .. import models, schemas
 from typing import List, Optional
 from fastapi import APIRouter
 from sqlalchemy.orm import Session
+from sqlalchemy import func
 from ..database import get_db
 from fastapi import Response, status, HTTPException, Depends
 from .. import oauth2
@@ -13,7 +14,9 @@ router = APIRouter(
 
 
 # GET ALL permitted posts
-@router.get("/", response_model=List[schemas.Post])
+# @router.get("/", response_model=List[schemas.Post])
+# @router.get("/", response_model=List[schemas.PostOut])
+@router.get("/") # TODO: FIX THE PYDANTIC FORMATTING ISSUE, can't recognize title and content from PostBase, default
 async def get_posts(db: Session = Depends(get_db),
                     current_user: int = Depends(oauth2.get_current_user),
                     limit: int = 100,
@@ -26,8 +29,15 @@ async def get_posts(db: Session = Depends(get_db),
     posts_query_sql = db.query(models.Post).filter(models.Post.title.contains(search)).limit(limit).offset(skip)
     posts = posts_query_sql.all()
 
-    print(posts_query_sql)
-    return posts
+    new_posts_query_sql = db.query(models.Post, func.count(models.Vote.post_id).label("votes")).\
+        join(models.Vote, models.Vote.post_id == models.Post.id, isouter=True).group_by(models.Post.id)
+    result = new_posts_query_sql.all()
+
+    print(f'----------------old post posts query was {posts_query_sql} \n and now the new post query is {new_posts_query_sql}' )
+
+
+    # print(posts_query_sql)
+    return result
 
 
 # POST one post

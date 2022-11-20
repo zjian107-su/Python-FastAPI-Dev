@@ -1,11 +1,11 @@
 # Python version: 3.9.6
-# YouTube video:
+# YouTube video: 09:16:14, 11/20/22
 from . import models
 from dotenv import load_dotenv
 from .database import engine
 from fastapi import FastAPI
 import datetime
-from .routers import post, user, auth
+from .routers import post, user, auth, vote
 
 
 load_dotenv()
@@ -18,6 +18,7 @@ app = FastAPI()
 app.include_router(post.router)
 app.include_router(user.router)
 app.include_router(auth.router)
+app.include_router(vote.router)
 
 @app.get("/")
 async def root():
