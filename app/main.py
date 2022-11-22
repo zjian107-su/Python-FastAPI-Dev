@@ -1,5 +1,5 @@
 # Python version: 3.9.6
-# YouTube video: 09:16:14, 11/20/22
+# YouTube video: 11:11:21, 11/21/22
 from . import models
 from dotenv import load_dotenv
 from .database import engine
@@ -11,7 +11,9 @@ from .routers import post, user, auth, vote
 load_dotenv()
 
 # checks and create all tables
-models.Base.metadata.create_all(bind=engine)
+# Comment: comment the code below so ALEMBIC generates the table
+# Comment: instead of sqlalchemy
+# models.Base.metadata.create_all(bind=engine)
 
 app = FastAPI()
 
