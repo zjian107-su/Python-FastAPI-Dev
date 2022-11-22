@@ -15,9 +15,10 @@ router = APIRouter(
 
 # GET ALL permitted posts
 # @router.get("/", response_model=List[schemas.Post])
-# @router.get("/", response_model=List[schemas.PostOut])
-@router.get("/") # TODO: FIX THE PYDANTIC FORMATTING ISSUE, can't recognize title and content from PostBase, default
-async def get_posts(db: Session = Depends(get_db),
+# @router.get("/", response_model=List[schemas.Post])
+@router.get("/", response_model=List[schemas.PostOut])
+# @router.get("/") # TODO: FIX THE PYDANTIC FORMATTING ISSUE, can't recognize title and content from PostBase, default
+def get_posts(db: Session = Depends(get_db),
                     current_user: int = Depends(oauth2.get_current_user),
                     limit: int = 100,
                     skip: int = 0,
@@ -37,6 +38,7 @@ async def get_posts(db: Session = Depends(get_db),
 
 
     # print(posts_query_sql)
+    # return posts
     return result
 
 

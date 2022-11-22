@@ -37,13 +37,14 @@ class Post(PostBase):
         orm_mode = True
 
 
-class PostOut(PostBase):
+class PostOut(BaseModel):
     Post: Post
     votes: int
 
     # change sqlalchemy model to pydantic model
     class Config:
         orm_mode = True
+
 
 
 class UserCreate(BaseModel):

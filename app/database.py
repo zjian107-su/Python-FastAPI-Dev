@@ -5,6 +5,7 @@ from sqlalchemy.orm import sessionmaker
 from dotenv import load_dotenv
 import os
 from .config import settings
+
 # import time
 # from fastapi.params import \
 #     Body  # old fashion way to catch Postman POST params - Body
@@ -30,10 +31,10 @@ load_dotenv()
 #         time.sleep(2)
 
 # SQLALCHEMY DB CONNECTION
-SQLALCHEMY_DATABASE_URL = f"postgresql://{settings.database_username}:{settings.database_password}@" \
-                          f"{settings.database_hostname}" \
-                          f"/{settings.database_name}"
-print(SQLALCHEMY_DATABASE_URL)
+SQLALCHEMY_DATABASE_URL = f"postgresql://{settings.database_username}:{settings.database_password}@{settings.database_hostname}/{settings.database_name}"
+print(f'SQLALCHEMY_DATABASE_URL is {SQLALCHEMY_DATABASE_URL}', "from database.py")
+
+print()
 
 engine = create_engine(SQLALCHEMY_DATABASE_URL)
 
