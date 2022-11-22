@@ -13,7 +13,7 @@ config = context.config
 
 config.set_main_option('sqlalchemy.url',
                        f"postgresql://{settings.database_username}:{settings.database_password}@{settings.database_hostname}/{settings.database_name}")
-print(config, "from env.py")
+# print(config, "from env.py")
 
 # Interpret the config file for Python logging.
 # This line sets up loggers basically.

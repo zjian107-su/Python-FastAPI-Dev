@@ -32,7 +32,7 @@ load_dotenv()
 
 # SQLALCHEMY DB CONNECTION
 SQLALCHEMY_DATABASE_URL = f"postgresql://{settings.database_username}:{settings.database_password}@{settings.database_hostname}/{settings.database_name}"
-print(f'SQLALCHEMY_DATABASE_URL is {SQLALCHEMY_DATABASE_URL}', "from database.py")
+# print(f'SQLALCHEMY_DATABASE_URL is {SQLALCHEMY_DATABASE_URL}', "from database.py")
 
 print()
 
