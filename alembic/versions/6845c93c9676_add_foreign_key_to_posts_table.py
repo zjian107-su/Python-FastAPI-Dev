@@ -23,7 +23,6 @@ def upgrade() -> None:
 
 
 def downgrade() -> None:
-    print("Robyn!!!")
-    # op.drop_constraint('post_users_fk', table_name='posts')
+    op.drop_constraint('post_user_fk', table_name='posts')
     op.drop_column('posts', 'owner_id')
     pass
