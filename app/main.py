@@ -7,6 +7,9 @@ from fastapi import FastAPI
 import datetime
 from .routers import post, user, auth, vote
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import HTMLResponse
+
+from .page import html_content
 
 load_dotenv()
 
@@ -25,7 +28,6 @@ origins = [
     "http://localhost:8080",
 ]
 
-
 app.add_middleware(
     CORSMiddleware,
     allow_origins=origins,
@@ -39,6 +41,10 @@ app.include_router(user.router)
 app.include_router(auth.router)
 app.include_router(vote.router)
 
+
 @app.get("/")
 async def root():
-    return {"message": "Hello World!!!!!!"}
+    # test = "Daniel!!!"
+
+    return HTMLResponse(content=html_content, status_code=200)
+    # return {"Daniel"}
