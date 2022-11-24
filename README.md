@@ -1,12 +1,13 @@
 # Python-WebAPI-Dev
+<a href="https://fastapi-jiang.herokuapp.com/" target="_blank">Live website</a>
+
+## Screenshots
+<img width="1243" alt="screenshot_01" src="https://user-images.githubusercontent.com/35544956/203724990-77e1c45c-710a-48d7-9bab-82dde0427d52.png">
+<img width="1243" alt="screenshot_02" src="https://user-images.githubusercontent.com/35544956/203725003-25e93c3c-1af5-404d-900f-a56fa31495c7.png">
 
 ## Commit message convention:
 - 🍹: Feature in progress
 - ☘️: New feature
-- ✨: Updates
+- ✨: Update
 - 🪪: Section/Feature completion
 - 🎉: End of project
-
-## Resources:
-- <a href="https://www.notion.so/danielzezhengjiang/Python-WebAPI-Dev-060bc0e8e7cc4fa5aadf1113eb16ee9e" target="_blank">Notion Notes</a>
-- <a href="https://www.youtube.com/watch?v=0sOvCWFmrtA&t=201s" target="_blank">Python API Development</a>
