@@ -11,3 +11,5 @@
 - ✨: Update
 - 🪪: Section/Feature completion
 - 🎉: End of project
+
+## .env file is self maintained using notion
